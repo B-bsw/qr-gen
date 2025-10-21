@@ -24,7 +24,7 @@ export default function Home() {
             .catch((err) => console.error(err));
     }, [text]);
     return (
-        <div className="flex justify-center items-center h-screen flex-col gap-5 mx-4">
+        <div className="flex justify-center items-center h-full flex-col gap-5 mx-4">
             <div className="w-64 h-64 border-2 rounded-lg border-stone-300/80 p-1">
                 {text && (
                     <div>
