@@ -73,8 +73,8 @@ export default function Home() {
             width: 512,
             margin: 2,
             color: {
-                dark: colorPickerFg.toString('hex'),
-                light: colorPickerBg.toString('hex'),
+                dark: colorPickerFg.toString('hexa'),
+                light: colorPickerBg.toString('hexa'),
             },
         })
             .then((url) => setQrImage(url))
@@ -86,8 +86,8 @@ export default function Home() {
             width: 512,
             margin: 2,
             color: {
-                dark: colorPickerFg.toString('hex'),
-                light: colorPickerBg.toString('hex'),
+                dark: colorPickerFg.toString('hexa'),
+                light: colorPickerBg.toString('hexa'),
             },
         })
             .then((svg) => setQrSvg(svg))
@@ -137,8 +137,9 @@ export default function Home() {
     const copyLink = () => {
         if (!text) return
 
-        const fg = colorPickerFg.toString('hex')
-        const bg = colorPickerBg.toString('hex')
+        const fg = colorPickerFg.toString('hexa')
+        const bg = colorPickerBg.toString('hexa')
+        // console.log(fg)
 
         const url = `${window.location.origin}/qr?text=${encodeURIComponent(text)}&format=${selectedFormat}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}`
         navigator.clipboard
@@ -146,6 +147,11 @@ export default function Home() {
             .then(() => toast.info('Copy Success'))
             .catch(console.error)
     }
+
+    const colorPicker = [
+        { id: 1, value: colorPickerFg, set: setColorPickerFg },
+        { id: 2, value: colorPickerBg, set: setColorPickerBg },
+    ]
 
     return (
         <div className="flex h-full flex-col items-center justify-center overflow-auto transition-all">
@@ -175,87 +181,60 @@ export default function Home() {
                 </div>*/}
 
                 <div className="flex w-full justify-center gap-5">
-                    <ColorPicker
-                        value={colorPickerFg}
-                        onChange={setColorPickerFg}
-                    >
-                        <ColorPicker.Trigger>
-                            <ColorSwatch size="lg" />
-                            {/*<Label className="text-black">Pick a color</Label>*/}
-                        </ColorPicker.Trigger>
-                        <ColorPicker.Popover className="gap-2">
-                            <ColorArea
-                                aria-label="Color area"
-                                className="max-w-full"
-                                colorSpace="hsb"
-                                xChannel="saturation"
-                                yChannel="brightness"
-                            >
-                                <ColorArea.Thumb />
-                            </ColorArea>
-                            <div className="flex items-center gap-2 px-1">
-                                <ColorSlider
-                                    aria-label="Hue slider"
-                                    channel="hue"
-                                    className="flex-1"
+                    {colorPicker.map((c) => (
+                        <ColorPicker
+                            key={c.id}
+                            value={c.value}
+                            onChange={c.set}
+                        >
+                            <ColorPicker.Trigger>
+                                <ColorSwatch size="lg" />
+                                {/*<Label className="text-black">Pick a color</Label>*/}
+                            </ColorPicker.Trigger>
+                            <ColorPicker.Popover className="gap-2">
+                                <ColorArea
+                                    aria-label="Color area"
+                                    className="max-w-full"
                                     colorSpace="hsb"
+                                    xChannel="saturation"
+                                    yChannel="brightness"
                                 >
-                                    <ColorSlider.Track>
-                                        <ColorSlider.Thumb />
-                                    </ColorSlider.Track>
-                                </ColorSlider>
-                            </div>
-                            <ColorField aria-label="Color field">
-                                <ColorField.Group variant="secondary">
-                                    <ColorField.Prefix>
-                                        <ColorSwatch size="xs" />
-                                    </ColorField.Prefix>
-                                    <ColorField.Input />
-                                </ColorField.Group>
-                            </ColorField>
-                        </ColorPicker.Popover>
-                    </ColorPicker>
+                                    <ColorArea.Thumb />
+                                </ColorArea>
+                                <div className="flex flex-col items-center gap-2 px-1">
+                                    <ColorSlider
+                                        aria-label="Hue slider"
+                                        channel="hue"
+                                        className="flex-1"
+                                        colorSpace="hsb"
+                                    >
+                                        <ColorSlider.Track>
+                                            <ColorSlider.Thumb />
+                                        </ColorSlider.Track>
+                                    </ColorSlider>
 
-                    <ColorPicker
-                        onChange={setColorPickerBg}
-                        value={colorPickerBg}
-                    >
-                        <ColorPicker.Trigger>
-                            <ColorSwatch size="lg" />
-                            {/*<Label className="text-black">Pick a color</Label>*/}
-                        </ColorPicker.Trigger>
-                        <ColorPicker.Popover className="gap-2">
-                            <ColorArea
-                                aria-label="Color area"
-                                className="max-w-full"
-                                colorSpace="hsb"
-                                xChannel="saturation"
-                                yChannel="brightness"
-                            >
-                                <ColorArea.Thumb />
-                            </ColorArea>
-                            <div className="flex items-center gap-2 px-1">
-                                <ColorSlider
-                                    aria-label="Hue slider"
-                                    channel="hue"
-                                    className="flex-1"
-                                    colorSpace="hsb"
-                                >
-                                    <ColorSlider.Track>
-                                        <ColorSlider.Thumb />
-                                    </ColorSlider.Track>
-                                </ColorSlider>
-                            </div>
-                            <ColorField aria-label="Color field">
-                                <ColorField.Group variant="secondary">
-                                    <ColorField.Prefix>
-                                        <ColorSwatch size="xs" />
-                                    </ColorField.Prefix>
-                                    <ColorField.Input />
-                                </ColorField.Group>
-                            </ColorField>
-                        </ColorPicker.Popover>
-                    </ColorPicker>
+                                    <ColorSlider
+                                        aria-label="alpha slider"
+                                        channel="alpha"
+                                        className="flex-1"
+                                        colorSpace="rgb"
+                                    >
+                                        <ColorSlider.Track>
+                                            <ColorSlider.Thumb />
+                                        </ColorSlider.Track>
+                                    </ColorSlider>
+                                </div>
+                                <ColorField aria-label="Color field">
+                                    <ColorField.Group variant="secondary">
+                                        <ColorField.Prefix>
+                                            <ColorSwatch size="xs" />
+                                        </ColorField.Prefix>
+                                        <ColorField.Input />
+                                    </ColorField.Group>
+                                </ColorField>
+                            </ColorPicker.Popover>
+                        </ColorPicker>
+                    ))}
                 </div>
 
                 <section className="flex w-full flex-col items-center justify-center gap-3">
