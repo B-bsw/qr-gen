@@ -67,6 +67,7 @@ export default function Home() {
             return
         } else {
             setIsDisable(false)
+            setIsCheckCopy(false)
         }
 
         // PNG
@@ -137,7 +138,12 @@ export default function Home() {
 
     const copyLink = () => {
         if (!text) return
-        const url = `${window.location.origin}/qr?text=${encodeURIComponent(text)}&format=${selectedFormat}`
+
+        const fg = colorPickerFg.toString('hex')
+        const bg = colorPickerBg.toString('hex')
+
+        // แนบค่าสีเข้าไปใน URL ด้วย
+        const url = `${window.location.origin}/qr?text=${encodeURIComponent(text)}&format=${selectedFormat}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}`
         navigator.clipboard
             .writeText(url)
             .then(() => toast.info('Copy Success'))
@@ -264,7 +270,7 @@ export default function Home() {
                             // variant="secondary"
                             aria-label="input url"
                         >
-                            <InputGroup>
+                            <InputGroup onClick={() => setIsCheckCopy(false)}>
                                 <InputGroup.Prefix>https://</InputGroup.Prefix>
                                 <InputGroup.Input
                                     onChange={(e) =>
@@ -284,9 +290,6 @@ export default function Home() {
                                         onPress={() => {
                                             navigator.clipboard.writeText(text)
                                             setIsCheckCopy(true)
-                                            setTimeout(() => {
-                                                setIsCheckCopy(false)
-                                            }, 10000)
                                         }}
                                     >
                                         {isCheckCopy ? <CopyCheck /> : <Copy />}
