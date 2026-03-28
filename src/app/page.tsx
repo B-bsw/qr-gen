@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react'
 import QRCode from 'qrcode'
 import {
     Button,
+    ButtonGroup,
+    Card,
     InputGroup,
     Key,
     Label,
@@ -12,6 +14,7 @@ import {
     Toast,
     toast,
 } from '@heroui/react'
+import { Copy, CopyCheck } from 'lucide-react'
 
 const format = [
     {
@@ -31,13 +34,14 @@ const format = [
     },
 ]
 
-const placeholderURL = 'https://b-bsw.com'
+const placeholderURL = 'https://qr.b-bsw.com'
 
 export default function Home() {
-    const [text, setText] = useState<string | null>(placeholderURL)
+    const [text, setText] = useState<string>(placeholderURL)
     const [qrImage, setQrImage] = useState<string | null>(null)
     const [qrSvg, setQrSvg] = useState<string | null>(null)
     const [isDisable, setIsDisable] = useState<boolean>(true)
+    const [isCheckCopy, setIsCheckCopy] = useState<boolean>(false)
 
     const [selectedFormat, setSelectedFormat] = useState<Key>('png')
 
@@ -121,87 +125,120 @@ export default function Home() {
     return (
         <div className="mx-4 flex h-full flex-col items-center justify-center gap-5 transition-all">
             <Toast.Provider placement="bottom end" />
-            <div
-                className={`h-64 w-64 rounded-lg border-2 ${!text ? 'border-zinc-50' : 'border-zinc-500'} p-1`}
-            >
-                {text && (
-                    <div className="flex flex-col items-center gap-4">
-                        {qrImage && (
-                            <img
-                                src={qrImage}
-                                alt="QR Code"
-                                className="h-full w-full object-contain"
-                            />
+            <Card variant="tertiary">
+                <div className="flex min-w-full justify-center">
+                    <section className={`w-86 rounded-lg p-1`}>
+                        {text && (
+                            <div className="flex flex-col items-center gap-4">
+                                {qrImage && (
+                                    <img
+                                        src={qrImage}
+                                        alt="QR Code"
+                                        className="h-full w-full rounded-lg object-contain"
+                                    />
+                                )}
+                            </div>
                         )}
+                    </section>
+                </div>
+
+                {/*<div>
+                    <h1 className="text-3xl">QR Code Generator</h1>
+                </div>*/}
+
+                <section className="flex w-full flex-col items-center justify-center gap-2">
+                    <div className="w-full">
+                        <TextField
+                            className="w-full"
+                            defaultValue={placeholderURL.split('//')[1]}
+                            name="website"
+                            // variant="secondary"
+                            aria-label="input url"
+                        >
+                            <InputGroup>
+                                <InputGroup.Prefix>https://</InputGroup.Prefix>
+                                <InputGroup.Input
+                                    onChange={(e) =>
+                                        setText(
+                                            'https://' + e.currentTarget.value
+                                        )
+                                    }
+                                    className="max-w-70"
+                                />
+                                <InputGroup.Suffix className="pr-0">
+                                    <Button
+                                        isIconOnly
+                                        aria-label="Copy"
+                                        size="sm"
+                                        variant="ghost"
+                                        isDisabled={isCheckCopy}
+                                        onPress={() => {
+                                            navigator.clipboard.writeText(text)
+                                            setIsCheckCopy(true)
+                                            setTimeout(() => {
+                                                setIsCheckCopy(false)
+                                            }, 10000)
+                                        }}
+                                    >
+                                        {isCheckCopy ? <CopyCheck /> : <Copy />}
+                                    </Button>
+                                </InputGroup.Suffix>
+                            </InputGroup>
+                        </TextField>
                     </div>
-                )}
-            </div>
-            <div>
-                <h1 className="text-3xl">QR Code Generator</h1>
-            </div>
-            <div className="w-64">
-                <TextField
-                    className="w-full max-w-70"
-                    defaultValue={placeholderURL.split('//')[1]}
-                    name="website"
-                    variant="secondary"
-                    aria-label="input url"
-                >
-                    <InputGroup>
-                        <InputGroup.Prefix>https://</InputGroup.Prefix>
-                        <InputGroup.Input
-                            onChange={(e) => console.log(e.currentTarget.value)}
-                            className="max-w-70] w-full"
-                        />
-                    </InputGroup>
-                </TextField>
-            </div>
 
-            <div className="flex flex-col items-center gap-3">
-                <div className="flex items-center gap-2">
-                    <Select
-                        className="w-[256px]"
-                        placeholder="Select one"
-                        variant="secondary"
-                        defaultValue={'png'}
-                        aria-label="format"
-                        onChange={(e) => setSelectedFormat(e as Key)}
-                    >
-                        <Select.Trigger>
-                            <Select.Value />
-                            <Select.Indicator />
-                        </Select.Trigger>
-                        <Select.Popover>
-                            {format && (
-                                <ListBox>
-                                    {format.map((f) => (
-                                        <ListBox.Item
-                                            key={f.key}
-                                            id={f.value}
-                                            textValue={f.value}
-                                        >
-                                            {f.name}
-                                            <ListBox.ItemIndicator />
-                                        </ListBox.Item>
-                                    ))}
-                                </ListBox>
-                            )}
-                        </Select.Popover>
-                    </Select>
+                    <div className="flex w-full flex-col items-center gap-3">
+                        <div className="flex w-full items-center gap-2">
+                            <Select
+                                className="w-full"
+                                placeholder="Select one"
+                                // variant="secondary"
+                                defaultValue={'png'}
+                                aria-label="format"
+                                onChange={(e) => setSelectedFormat(e as Key)}
+                            >
+                                <Select.Trigger>
+                                    <Select.Value />
+                                    <Select.Indicator />
+                                </Select.Trigger>
+                                <Select.Popover>
+                                    {format && (
+                                        <ListBox>
+                                            {format.map((f) => (
+                                                <ListBox.Item
+                                                    key={f.key}
+                                                    id={f.value}
+                                                    textValue={f.value}
+                                                >
+                                                    {f.name}
+                                                    <ListBox.ItemIndicator />
+                                                </ListBox.Item>
+                                            ))}
+                                        </ListBox>
+                                    )}
+                                </Select.Popover>
+                            </Select>
+                        </div>
+                        <div className="flex w-full max-w-70 justify-center gap-2">
+                            <ButtonGroup>
+                                <Button
+                                    onPress={handleDownload}
+                                    isDisabled={!qrImage || !qrSvg}
+                                >
+                                    Download
+                                </Button>
 
-                    <Button
-                        onPress={handleDownload}
-                        isDisabled={!qrImage || !qrSvg}
-                    >
-                        Download
-                    </Button>
-                </div>
-                <div className="flex gap-2">
-                    <Button onClick={copyLink} isDisabled={isDisable}>
-                        Copy QR Code ( Image )
-                    </Button>
-                </div>
-            </div>
+                                <Button
+                                    onClick={copyLink}
+                                    isDisabled={isDisable}
+                                >
+                                    Copy QR Code ( Image )
+                                </Button>
+                            </ButtonGroup>
+                        </div>
+                    </div>
+                </section>
+            </Card>
         </div>
     )
 }
