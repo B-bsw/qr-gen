@@ -19,6 +19,8 @@ import {
     ColorField,
     Color,
     parseColor,
+    Spinner,
+    Label,
 } from '@heroui/react'
 import { Check, Copy } from 'lucide-react'
 
@@ -42,7 +44,7 @@ const format = [
 
 const placeholderURL = 'https://qr.b-bsw.com'
 
-export default function Home() {
+export default function Page() {
     const [text, setText] = useState<string>(placeholderURL)
     const [qrImage, setQrImage] = useState<string | null>(null)
     const [qrSvg, setQrSvg] = useState<string | null>(null)
@@ -149,8 +151,13 @@ export default function Home() {
     }
 
     const colorPicker = [
-        { id: 1, value: colorPickerFg, set: setColorPickerFg },
-        { id: 2, value: colorPickerBg, set: setColorPickerBg },
+        { id: 1, value: colorPickerFg, set: setColorPickerFg, label: 'QR' },
+        {
+            id: 2,
+            value: colorPickerBg,
+            set: setColorPickerBg,
+            label: 'Background',
+        },
     ]
 
     return (
@@ -160,16 +167,23 @@ export default function Home() {
                 variant="tertiary"
                 className="overflow-auto max-sm:rounded-none max-sm:bg-white max-sm:shadow-none"
             >
+                <Card.Title className="text-2xl">
+                    <span className="text-black">QRCODE</span>
+                </Card.Title>
                 <div className="flex min-w-full justify-center">
-                    <section className={`w-86 rounded-lg p-1 max-sm:w-full`}>
+                    <section
+                        className={`h-86 w-86 rounded-lg p-1 max-sm:w-full`}
+                    >
                         {text && (
-                            <div className="flex flex-col items-center">
-                                {qrImage && (
+                            <div className="flex h-full flex-col items-center justify-center">
+                                {qrImage ? (
                                     <img
                                         src={qrImage}
                                         alt="QR Code"
                                         className="h-full w-full rounded-xl object-contain drop-shadow-md"
                                     />
+                                ) : (
+                                    <Spinner color="current" />
                                 )}
                             </div>
                         )}
@@ -189,7 +203,9 @@ export default function Home() {
                         >
                             <ColorPicker.Trigger>
                                 <ColorSwatch size="lg" />
-                                {/*<Label className="text-black">Pick a color</Label>*/}
+                                <Label className="text-black">
+                                    <span>{c.label}</span>
+                                </Label>
                             </ColorPicker.Trigger>
                             <ColorPicker.Popover className="gap-2">
                                 <ColorArea
@@ -307,8 +323,8 @@ export default function Home() {
                                 </Select.Popover>
                             </Select>
                         </div>
-                        <div className="flex w-full max-w-70 justify-center gap-2">
-                            <ButtonGroup>
+                        <div className="ustify-center flex w-full gap-2">
+                            <ButtonGroup fullWidth>
                                 <Button
                                     onPress={handleDownload}
                                     isDisabled={!qrImage || !qrSvg}
