@@ -123,18 +123,21 @@ export default function Home() {
     }
 
     return (
-        <div className="mx-4 flex h-full flex-col items-center justify-center gap-5 transition-all">
+        <div className="flex h-full flex-col items-center justify-center overflow-auto transition-all">
             <Toast.Provider placement="bottom end" />
-            <Card variant="tertiary">
+            <Card
+                variant="tertiary"
+                className="overflow-auto max-sm:rounded-none max-sm:bg-white max-sm:shadow-none"
+            >
                 <div className="flex min-w-full justify-center">
-                    <section className={`w-86 rounded-lg p-1`}>
+                    <section className={`w-86 rounded-lg p-1 max-sm:w-full`}>
                         {text && (
-                            <div className="flex flex-col items-center gap-4">
+                            <div className="flex flex-col items-center">
                                 {qrImage && (
                                     <img
                                         src={qrImage}
                                         alt="QR Code"
-                                        className="h-full w-full rounded-lg object-contain"
+                                        className="h-full w-full rounded-xl object-contain drop-shadow-md"
                                     />
                                 )}
                             </div>
@@ -225,13 +228,14 @@ export default function Home() {
                                     onPress={handleDownload}
                                     isDisabled={!qrImage || !qrSvg}
                                 >
+                                    <ButtonGroup.Separator />
                                     Download
                                 </Button>
-
                                 <Button
                                     onClick={copyLink}
                                     isDisabled={isDisable}
                                 >
+                                    <ButtonGroup.Separator />
                                     Copy QR Code ( Image )
                                 </Button>
                             </ButtonGroup>
