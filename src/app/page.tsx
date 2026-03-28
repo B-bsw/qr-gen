@@ -13,6 +13,14 @@ import {
     TextField,
     Toast,
     toast,
+    ColorPicker,
+    ColorArea,
+    ColorSlider,
+    ColorSwatch,
+    ColorSwatchPicker,
+    ColorField,
+    Color,
+    parseColor,
 } from '@heroui/react'
 import { Copy, CopyCheck } from 'lucide-react'
 
@@ -42,6 +50,12 @@ export default function Home() {
     const [qrSvg, setQrSvg] = useState<string | null>(null)
     const [isDisable, setIsDisable] = useState<boolean>(true)
     const [isCheckCopy, setIsCheckCopy] = useState<boolean>(false)
+    const [colorPickerFg, setColorPickerFg] = useState<Color>(
+        parseColor('#000000')
+    )
+    const [colorPickerBg, setColorPickerBg] = useState<Color>(
+        parseColor('#FFFFFF')
+    )
 
     const [selectedFormat, setSelectedFormat] = useState<Key>('png')
 
@@ -59,6 +73,10 @@ export default function Home() {
         QRCode.toDataURL(text, {
             width: 512,
             margin: 2,
+            color: {
+                dark: colorPickerFg.toString('hex'),
+                light: colorPickerBg.toString('hex'),
+            },
         })
             .then((url) => setQrImage(url))
             .catch(console.error)
@@ -68,10 +86,14 @@ export default function Home() {
             type: 'svg',
             width: 512,
             margin: 2,
+            color: {
+                dark: colorPickerFg.toString('hex'),
+                light: colorPickerBg.toString('hex'),
+            },
         })
             .then((svg) => setQrSvg(svg))
             .catch(console.error)
-    }, [text])
+    }, [text, selectedFormat, colorPickerFg, colorPickerBg])
 
     const handleDownload = () => {
         if (!text) return
@@ -149,7 +171,91 @@ export default function Home() {
                     <h1 className="text-3xl">QR Code Generator</h1>
                 </div>*/}
 
-                <section className="flex w-full flex-col items-center justify-center gap-2">
+                <div className="flex w-full justify-center gap-5">
+                    <ColorPicker
+                        value={colorPickerFg}
+                        onChange={setColorPickerFg}
+                    >
+                        <ColorPicker.Trigger>
+                            <ColorSwatch size="lg" />
+                            {/*<Label className="text-black">Pick a color</Label>*/}
+                        </ColorPicker.Trigger>
+                        <ColorPicker.Popover className="gap-2">
+                            <ColorArea
+                                aria-label="Color area"
+                                className="max-w-full"
+                                colorSpace="hsb"
+                                xChannel="saturation"
+                                yChannel="brightness"
+                            >
+                                <ColorArea.Thumb />
+                            </ColorArea>
+                            <div className="flex items-center gap-2 px-1">
+                                <ColorSlider
+                                    aria-label="Hue slider"
+                                    channel="hue"
+                                    className="flex-1"
+                                    colorSpace="hsb"
+                                >
+                                    <ColorSlider.Track>
+                                        <ColorSlider.Thumb />
+                                    </ColorSlider.Track>
+                                </ColorSlider>
+                            </div>
+                            <ColorField aria-label="Color field">
+                                <ColorField.Group variant="secondary">
+                                    <ColorField.Prefix>
+                                        <ColorSwatch size="xs" />
+                                    </ColorField.Prefix>
+                                    <ColorField.Input />
+                                </ColorField.Group>
+                            </ColorField>
+                        </ColorPicker.Popover>
+                    </ColorPicker>
+
+                    <ColorPicker
+                        onChange={setColorPickerBg}
+                        value={colorPickerBg}
+                    >
+                        <ColorPicker.Trigger>
+                            <ColorSwatch size="lg" />
+                            {/*<Label className="text-black">Pick a color</Label>*/}
+                        </ColorPicker.Trigger>
+                        <ColorPicker.Popover className="gap-2">
+                            <ColorArea
+                                aria-label="Color area"
+                                className="max-w-full"
+                                colorSpace="hsb"
+                                xChannel="saturation"
+                                yChannel="brightness"
+                            >
+                                <ColorArea.Thumb />
+                            </ColorArea>
+                            <div className="flex items-center gap-2 px-1">
+                                <ColorSlider
+                                    aria-label="Hue slider"
+                                    channel="hue"
+                                    className="flex-1"
+                                    colorSpace="hsb"
+                                >
+                                    <ColorSlider.Track>
+                                        <ColorSlider.Thumb />
+                                    </ColorSlider.Track>
+                                </ColorSlider>
+                            </div>
+                            <ColorField aria-label="Color field">
+                                <ColorField.Group variant="secondary">
+                                    <ColorField.Prefix>
+                                        <ColorSwatch size="xs" />
+                                    </ColorField.Prefix>
+                                    <ColorField.Input />
+                                </ColorField.Group>
+                            </ColorField>
+                        </ColorPicker.Popover>
+                    </ColorPicker>
+                </div>
+
+                <section className="flex w-full flex-col items-center justify-center gap-3">
                     <div className="w-full">
                         <TextField
                             className="w-full"
