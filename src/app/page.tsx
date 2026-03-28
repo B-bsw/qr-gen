@@ -1,19 +1,54 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import QRCode from 'qrcode'
+import {
+    Button,
+    InputGroup,
+    Key,
+    Label,
+    ListBox,
+    Select,
+    TextField,
+    Toast,
+    toast,
+} from '@heroui/react'
+
+const format = [
+    {
+        key: 1,
+        value: 'png',
+        name: 'PNG',
+    },
+    {
+        key: 2,
+        value: 'jpg',
+        name: 'JPG',
+    },
+    {
+        key: 3,
+        value: 'svg',
+        name: 'SVG',
+    },
+]
+
+const placeholderURL = 'https://b-bsw.com'
 
 export default function Home() {
-    const [text, setText] = useState<string | null>(null)
+    const [text, setText] = useState<string | null>(placeholderURL)
     const [qrImage, setQrImage] = useState<string | null>(null)
     const [qrSvg, setQrSvg] = useState<string | null>(null)
+    const [isDisable, setIsDisable] = useState<boolean>(true)
 
-    const [selectedFormat, setSelectedFormat] = useState('png')
+    const [selectedFormat, setSelectedFormat] = useState<Key>('png')
 
     useEffect(() => {
         if (!text) {
             setQrImage(null)
             setQrSvg(null)
+            setIsDisable(true)
             return
+        } else {
+            setIsDisable(false)
         }
 
         // PNG
@@ -62,7 +97,10 @@ export default function Home() {
                     ctx.fillRect(0, 0, canvas.width, canvas.height)
                 }
                 ctx.drawImage(img, 0, 0)
-                const url = canvas.toDataURL(selectedFormat === 'png' ? 'image/png' : 'image/jpeg', 0.9)
+                const url = canvas.toDataURL(
+                    selectedFormat === 'png' ? 'image/png' : 'image/jpeg',
+                    0.9
+                )
                 const a = document.createElement('a')
                 a.href = url
                 a.download = `qrcode.${selectedFormat}`
@@ -74,21 +112,26 @@ export default function Home() {
     const copyLink = () => {
         if (!text) return
         const url = `${window.location.origin}/qr?text=${encodeURIComponent(text)}&format=${selectedFormat}`
-        navigator.clipboard.writeText(url)
-            .then(() => alert(`Link copied for ${selectedFormat.toUpperCase()} format!`))
+        navigator.clipboard
+            .writeText(url)
+            .then(() => toast.info('Copy Success'))
             .catch(console.error)
     }
 
-
     return (
         <div className="mx-4 flex h-full flex-col items-center justify-center gap-5 transition-all">
+            <Toast.Provider placement="bottom end" />
             <div
                 className={`h-64 w-64 rounded-lg border-2 ${!text ? 'border-zinc-50' : 'border-zinc-500'} p-1`}
             >
                 {text && (
                     <div className="flex flex-col items-center gap-4">
                         {qrImage && (
-                            <img src={qrImage} alt="QR Code" className="h-full w-full object-contain" />
+                            <img
+                                src={qrImage}
+                                alt="QR Code"
+                                className="h-full w-full object-contain"
+                            />
                         )}
                     </div>
                 )}
@@ -97,43 +140,66 @@ export default function Home() {
                 <h1 className="text-3xl">QR Code Generator</h1>
             </div>
             <div className="w-64">
-                <input
-                    type="text"
-                    className="font-pormpt w-full rounded-md border-2 border-zinc-300 p-1 outline-0"
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="https://example.com"
-                />
+                <TextField
+                    className="w-full max-w-70"
+                    defaultValue={placeholderURL.split('//')[1]}
+                    name="website"
+                    variant="secondary"
+                    aria-label="input url"
+                >
+                    <InputGroup>
+                        <InputGroup.Prefix>https://</InputGroup.Prefix>
+                        <InputGroup.Input
+                            onChange={(e) => console.log(e.currentTarget.value)}
+                            className="max-w-70] w-full"
+                        />
+                    </InputGroup>
+                </TextField>
             </div>
 
             <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
-                    <select
-                        value={selectedFormat}
-                        onChange={(e) => setSelectedFormat(e.target.value)}
-                        className="rounded-md border-2 border-zinc-300 p-1 outline-0"
+                    <Select
+                        className="w-[256px]"
+                        placeholder="Select one"
+                        variant="secondary"
+                        defaultValue={'png'}
+                        aria-label="format"
+                        onChange={(e) => setSelectedFormat(e as Key)}
                     >
-                        <option value="png">PNG</option>
-                        <option value="jpg">JPG</option>
-                        <option value="svg">SVG</option>
-                    </select>
+                        <Select.Trigger>
+                            <Select.Value />
+                            <Select.Indicator />
+                        </Select.Trigger>
+                        <Select.Popover>
+                            {format && (
+                                <ListBox>
+                                    {format.map((f) => (
+                                        <ListBox.Item
+                                            key={f.key}
+                                            id={f.value}
+                                            textValue={f.value}
+                                        >
+                                            {f.name}
+                                            <ListBox.ItemIndicator />
+                                        </ListBox.Item>
+                                    ))}
+                                </ListBox>
+                            )}
+                        </Select.Popover>
+                    </Select>
 
-                    <button
-                        onClick={handleDownload}
-                        disabled={!qrImage || !qrSvg}
-                        className="rounded-md bg-zinc-800 px-4 py-1 text-white disabled:opacity-50"
+                    <Button
+                        onPress={handleDownload}
+                        isDisabled={!qrImage || !qrSvg}
                     >
                         Download
-                    </button>
+                    </Button>
                 </div>
-
                 <div className="flex gap-2">
-                    <button
-                        onClick={copyLink}
-                        disabled={!text}
-                        className="text-sm text-zinc-600 underline disabled:opacity-50"
-                    >
-                        Copy QR Code
-                    </button>
+                    <Button onClick={copyLink} isDisabled={isDisable}>
+                        Copy QR Code ( Image )
+                    </Button>
                 </div>
             </div>
         </div>
