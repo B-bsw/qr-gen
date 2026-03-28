@@ -35,74 +35,50 @@ export default function Home() {
     }, [text])
 
     const handleDownload = () => {
-        if (selectedFormat === 'png') {
-            downloadPNG()
-        } else if (selectedFormat === 'jpg') {
-            downloadJPG()
-        } else if (selectedFormat === 'svg') {
-            downloadSVG()
-        }
-    }
+        if (!text) return
 
-    const downloadPNG = () => {
-        if (!qrImage) return
-
-        const a = document.createElement('a')
-        a.href = qrImage
-        a.download = 'qrcode.png'
-        a.click()
-    }
-
-    const downloadSVG = () => {
-        if (!qrSvg) return
-
-        const blob = new Blob([qrSvg], { type: 'image/svg+xml' })
-        const url = URL.createObjectURL(blob)
-
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'qrcode.svg'
-        a.click()
-
-        URL.revokeObjectURL(url)
-    }
-
-    const downloadJPG = () => {
-        if (!qrImage) return
-
-        const img = new Image()
-        img.src = qrImage
-
-        img.onload = () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = img.width
-            canvas.height = img.height
-
-            const ctx = canvas.getContext('2d')
-            if (!ctx) return
-
-            // background สีขาว (JPG ไม่มี transparency)
-            ctx.fillStyle = '#ffffff'
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-            ctx.drawImage(img, 0, 0)
-
-            const jpgUrl = canvas.toDataURL('image/jpeg', 0.9)
-
+        if (selectedFormat === 'svg') {
+            if (!qrSvg) return
+            const blob = new Blob([qrSvg], { type: 'image/svg+xml' })
+            const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
-            a.href = jpgUrl
-            a.download = 'qrcode.jpg'
+            a.href = url
+            a.download = 'qrcode.svg'
             a.click()
+            URL.revokeObjectURL(url)
+        } else if (selectedFormat === 'png' || selectedFormat === 'jpg') {
+            if (!qrImage) return
+            const img = new Image()
+            img.src = qrImage
+            img.onload = () => {
+                const canvas = document.createElement('canvas')
+                canvas.width = img.width
+                canvas.height = img.height
+                const ctx = canvas.getContext('2d')
+                if (!ctx) return
+
+                if (selectedFormat === 'jpg') {
+                    ctx.fillStyle = '#ffffff'
+                    ctx.fillRect(0, 0, canvas.width, canvas.height)
+                }
+                ctx.drawImage(img, 0, 0)
+                const url = canvas.toDataURL(selectedFormat === 'png' ? 'image/png' : 'image/jpeg', 0.9)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `qrcode.${selectedFormat}`
+                a.click()
+            }
         }
     }
 
     const copyLink = () => {
         if (!text) return
-        const url = `${window.location.origin}/view-svg?text=${encodeURIComponent(text)}`
+        const url = `${window.location.origin}/qr?text=${encodeURIComponent(text)}&format=${selectedFormat}`
         navigator.clipboard.writeText(url)
-            .then(() => alert('Link copied to clipboard!'))
+            .then(() => alert(`Link copied for ${selectedFormat.toUpperCase()} format!`))
             .catch(console.error)
     }
+
 
     return (
         <div className="mx-4 flex h-full flex-col items-center justify-center gap-5 transition-all">
@@ -156,12 +132,10 @@ export default function Home() {
                         disabled={!text}
                         className="text-sm text-zinc-600 underline disabled:opacity-50"
                     >
-                        Copy link
+                        Copy QR Code
                     </button>
                 </div>
             </div>
         </div>
     )
 }
-
-
