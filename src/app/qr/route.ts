@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         color: {
             dark: fg,
             light: bg,
-        },
+      },
     }
 
     if (format === 'svg') {

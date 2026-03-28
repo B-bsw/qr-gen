@@ -42,6 +42,15 @@ const format = [
     },
 ]
 
+type ErrorCorrectionLevel = 'high' | 'low' | 'medium' | 'quartile'
+
+const errCorrLvl = [
+    { id: 1, level: 'high' },
+    { id: 2, level: 'low' },
+    { id: 3, level: 'medium' },
+    { id: 4, level: 'quartile' },
+]
+
 const placeholderURL = 'https://qr.b-bsw.com'
 
 export default function Page() {
@@ -56,6 +65,7 @@ export default function Page() {
     const [colorPickerBg, setColorPickerBg] = useState<Color>(
         parseColor('#FFFFFF')
     )
+    const [level, setLevel] = useState<ErrorCorrectionLevel>('high')
 
     const [selectedFormat, setSelectedFormat] = useState<Key>('png')
 
@@ -78,6 +88,7 @@ export default function Page() {
                 dark: colorPickerFg.toString('hexa'),
                 light: colorPickerBg.toString('hexa'),
             },
+            errorCorrectionLevel: level,
         })
             .then((url) => setQrImage(url))
             .catch(console.error)
@@ -91,10 +102,11 @@ export default function Page() {
                 dark: colorPickerFg.toString('hexa'),
                 light: colorPickerBg.toString('hexa'),
             },
+            errorCorrectionLevel: level,
         })
             .then((svg) => setQrSvg(svg))
             .catch(console.error)
-    }, [text, selectedFormat, colorPickerFg, colorPickerBg])
+    }, [text, selectedFormat, colorPickerFg, colorPickerBg, level])
 
     const handleDownload = () => {
         if (!text) return
@@ -167,7 +179,7 @@ export default function Page() {
                 variant="tertiary"
                 className="overflow-auto max-sm:rounded-none max-sm:bg-white max-sm:shadow-none"
             >
-                <Card.Title className="text-2xl">
+                <Card.Title className="text-2xl max-sm:text-center">
                     <span className="text-black">QRCODE</span>
                 </Card.Title>
                 <div className="flex min-w-full justify-center">
@@ -180,7 +192,7 @@ export default function Page() {
                                     <img
                                         src={qrImage}
                                         alt="QR Code"
-                                        className="h-full w-full rounded-xl object-contain drop-shadow-md"
+                                        className="h-full w-full rounded-xl object-contain sm:drop-shadow-md"
                                     />
                                 ) : (
                                     <Spinner color="current" />
@@ -320,6 +332,38 @@ export default function Page() {
                                             ))}
                                         </ListBox>
                                     )}
+                                </Select.Popover>
+                            </Select>
+
+                            <Select
+                                className="w-full"
+                                placeholder="Select one"
+                                // variant="secondary"
+                                defaultValue={'high'}
+                                aria-label="level"
+                                onChange={(e) =>
+                                    setLevel(e as ErrorCorrectionLevel)
+                                }
+                            >
+                                <Select.Trigger>
+                                    <Select.Value />
+                                    <Select.Indicator />
+                                </Select.Trigger>
+                                <Select.Popover>
+                                    <ListBox>
+                                        {errCorrLvl.map((lvl) => (
+                                            <ListBox.Item
+                                                key={lvl.id}
+                                                id={lvl.level}
+                                                textValue={lvl.level}
+                                            >
+                                                <span className="uppercase">
+                                                    {lvl.level}
+                                                </span>
+                                                <ListBox.ItemIndicator />
+                                            </ListBox.Item>
+                                        ))}
+                                    </ListBox>
                                 </Select.Popover>
                             </Select>
                         </div>
