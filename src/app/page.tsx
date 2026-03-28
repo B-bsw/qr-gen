@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import QRCode from 'qrcode'
 import {
     Button,
@@ -7,7 +7,6 @@ import {
     Card,
     InputGroup,
     Key,
-    Label,
     ListBox,
     Select,
     TextField,
@@ -17,12 +16,11 @@ import {
     ColorArea,
     ColorSlider,
     ColorSwatch,
-    ColorSwatchPicker,
     ColorField,
     Color,
     parseColor,
 } from '@heroui/react'
-import { Copy, CopyCheck } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 
 const format = [
     {
@@ -142,7 +140,6 @@ export default function Home() {
         const fg = colorPickerFg.toString('hex')
         const bg = colorPickerBg.toString('hex')
 
-        // แนบค่าสีเข้าไปใน URL ด้วย
         const url = `${window.location.origin}/qr?text=${encodeURIComponent(text)}&format=${selectedFormat}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}`
         navigator.clipboard
             .writeText(url)
@@ -292,7 +289,7 @@ export default function Home() {
                                             setIsCheckCopy(true)
                                         }}
                                     >
-                                        {isCheckCopy ? <CopyCheck /> : <Copy />}
+                                        {isCheckCopy ? <Check /> : <Copy />}
                                     </Button>
                                 </InputGroup.Suffix>
                             </InputGroup>
