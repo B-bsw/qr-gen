@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
 
     const fg = searchParams.get('fg') ?? '#000000'
     const bg = searchParams.get('bg') ?? '#ffffff'
+    const quality: number = Number(searchParams.get('quality')) ?? 512
 
     if (!text) {
         return NextResponse.json(
@@ -27,12 +28,12 @@ export async function GET(request: NextRequest) {
     }
 
     const qrOptions = {
-        width: 512,
+        width: quality,
         margin: 2,
         color: {
             dark: fg,
             light: bg,
-      },
+        },
     }
 
     if (format === 'svg') {

@@ -51,6 +51,13 @@ const errCorrLvl = [
     { id: 4, level: 'quartile' },
 ]
 
+const qualityLevel = [
+    { id: 4, q: 128 },
+    { id: 5, q: 512 },
+    { id: 6, q: 1024 },
+    { id: 7, q: 2048 },
+]
+
 const placeholderURL = 'https://qr.b-bsw.com'
 
 export default function Page() {
@@ -65,9 +72,10 @@ export default function Page() {
     const [colorPickerBg, setColorPickerBg] = useState<Color>(
         parseColor('#FFFFFF')
     )
-    const [level, setLevel] = useState<ErrorCorrectionLevel>('high')
-
+    const [level, setLevel] = useState<ErrorCorrectionLevel>('medium')
     const [selectedFormat, setSelectedFormat] = useState<Key>('png')
+    const [selectQuality, setSelectQuality] = useState<number>(512)
+    const [swapHttps, setSwapHttps] = useState<'https' | 'http'>('https')
 
     useEffect(() => {
         if (!text) {
@@ -82,7 +90,7 @@ export default function Page() {
 
         // PNG
         QRCode.toDataURL(text, {
-            width: 512,
+            width: selectQuality,
             margin: 2,
             color: {
                 dark: colorPickerFg.toString('hexa'),
@@ -96,7 +104,7 @@ export default function Page() {
         // SVG
         QRCode.toString(text, {
             type: 'svg',
-            width: 512,
+            width: selectQuality,
             margin: 2,
             color: {
                 dark: colorPickerFg.toString('hexa'),
@@ -106,7 +114,14 @@ export default function Page() {
         })
             .then((svg) => setQrSvg(svg))
             .catch(console.error)
-    }, [text, selectedFormat, colorPickerFg, colorPickerBg, level])
+    }, [
+        text,
+        selectedFormat,
+        colorPickerFg,
+        colorPickerBg,
+        level,
+        selectQuality,
+    ])
 
     const handleDownload = () => {
         if (!text) return
@@ -155,7 +170,7 @@ export default function Page() {
         const bg = colorPickerBg.toString('hexa')
         // console.log(fg)
 
-        const url = `${window.location.origin}/qr?text=${encodeURIComponent(text)}&format=${selectedFormat}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}`
+        const url = `${window.location.origin}/qr?text=${encodeURIComponent(text)}&format=${selectedFormat}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}&quality=${selectQuality}`
         navigator.clipboard
             .writeText(url)
             .then(() => toast.info('Copy Success'))
@@ -163,7 +178,12 @@ export default function Page() {
     }
 
     const colorPicker = [
-        { id: 1, value: colorPickerFg, set: setColorPickerFg, label: 'QR' },
+        {
+            id: 1,
+            value: colorPickerFg,
+            set: setColorPickerFg,
+            label: 'Foreground',
+        },
         {
             id: 2,
             value: colorPickerBg,
@@ -201,11 +221,11 @@ export default function Page() {
                         )}
                     </section>
                 </div>
-
                 {/*<div>
                     <h1 className="text-3xl">QR Code Generator</h1>
                 </div>*/}
 
+                {/*Color Picker*/}
                 <div className="flex w-full justify-center gap-5">
                     {colorPicker.map((c) => (
                         <ColorPicker
@@ -264,8 +284,8 @@ export default function Page() {
                         </ColorPicker>
                     ))}
                 </div>
-
-                <section className="flex w-full flex-col items-center justify-center gap-3">
+                {/*INPUT URL*/}
+                <section className="flex w-full flex-col items-center justify-center gap-2">
                     <div className="w-full">
                         <TextField
                             className="w-full"
@@ -275,11 +295,26 @@ export default function Page() {
                             aria-label="input url"
                         >
                             <InputGroup onClick={() => setIsCheckCopy(false)}>
-                                <InputGroup.Prefix>https://</InputGroup.Prefix>
+                                <InputGroup.Prefix
+                                    className="cursor-pointer touch-none"
+                                    onClick={() =>
+                                        setSwapHttps(
+                                            swapHttps === 'http'
+                                                ? 'https'
+                                                : 'http'
+                                        )
+                                    }
+                                >
+                                    {swapHttps}://
+                                </InputGroup.Prefix>
                                 <InputGroup.Input
+                                    value={text.split('://')[2]}
                                     onChange={(e) =>
                                         setText(
-                                            'https://' + e.currentTarget.value
+                                            (
+                                                `${swapHttps}://` +
+                                                e.currentTarget.value
+                                            ).trim()
                                         )
                                     }
                                     className="max-w-70"
@@ -302,9 +337,10 @@ export default function Page() {
                             </InputGroup>
                         </TextField>
                     </div>
-
+                    {/*Selection*/}
                     <div className="flex w-full flex-col items-center gap-3">
                         <div className="flex w-full items-center gap-2">
+                            {/*Format type*/}
                             <Select
                                 className="w-full"
                                 placeholder="Select one"
@@ -313,6 +349,9 @@ export default function Page() {
                                 aria-label="format"
                                 onChange={(e) => setSelectedFormat(e as Key)}
                             >
+                                <Label className="w-full text-center text-xs text-black">
+                                    Format type
+                                </Label>
                                 <Select.Trigger>
                                     <Select.Value />
                                     <Select.Indicator />
@@ -335,16 +374,20 @@ export default function Page() {
                                 </Select.Popover>
                             </Select>
 
+                            {/*Level*/}
                             <Select
                                 className="w-full"
                                 placeholder="Select one"
                                 // variant="secondary"
-                                defaultValue={'high'}
+                                defaultValue={level}
                                 aria-label="level"
                                 onChange={(e) =>
                                     setLevel(e as ErrorCorrectionLevel)
                                 }
                             >
+                                <Label className="w-full text-center text-xs text-black">
+                                    Error Correction
+                                </Label>
                                 <Select.Trigger>
                                     <Select.Value />
                                     <Select.Indicator />
@@ -366,9 +409,46 @@ export default function Page() {
                                     </ListBox>
                                 </Select.Popover>
                             </Select>
+
+                            {/*Quality*/}
+                            <Select
+                                className="w-full"
+                                placeholder="Select one"
+                                // variant="secondary"
+                                defaultValue={512}
+                                aria-label="quality"
+                                onChange={(e) => setSelectQuality(e as number)}
+                            >
+                                <Label className="w-full text-center text-xs text-black">
+                                    Quality
+                                </Label>
+                                <Select.Trigger>
+                                    <Select.Value />
+                                    <Select.Indicator />
+                                </Select.Trigger>
+                                <Select.Popover>
+                                    <ListBox>
+                                        {qualityLevel.map((q) => (
+                                            <ListBox.Item
+                                                key={q.id}
+                                                id={q.q}
+                                                textValue={q.q.toString()}
+                                            >
+                                                <span className="uppercase">
+                                                    {q.q}
+                                                </span>
+                                                <ListBox.ItemIndicator />
+                                            </ListBox.Item>
+                                        ))}
+                                    </ListBox>
+                                </Select.Popover>
+                            </Select>
                         </div>
                         <div className="ustify-center flex w-full gap-2">
-                            <ButtonGroup fullWidth>
+                            <ButtonGroup
+                                fullWidth
+                                className="**:first:rounded-l-xl **:last:rounded-r-xl"
+                            >
                                 <Button
                                     onPress={handleDownload}
                                     isDisabled={!qrImage || !qrSvg}
