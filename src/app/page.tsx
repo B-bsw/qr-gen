@@ -21,6 +21,8 @@ import {
     parseColor,
     Spinner,
     Label,
+    Tooltip,
+    CloseButton,
 } from '@heroui/react'
 import { Check, Copy } from 'lucide-react'
 
@@ -177,6 +179,10 @@ export default function Page() {
             .catch(console.error)
     }
 
+    const handleSetText = (msg: string) => {
+        setText(msg.trim())
+    }
+
     const colorPicker = [
         {
             id: 1,
@@ -289,36 +295,83 @@ export default function Page() {
                     <div className="w-full">
                         <TextField
                             className="w-full"
-                            defaultValue={placeholderURL.split('//')[1]}
+                            defaultValue={placeholderURL.split('://')[1]}
                             name="website"
                             // variant="secondary"
                             aria-label="input url"
                         >
                             <InputGroup onClick={() => setIsCheckCopy(false)}>
-                                <InputGroup.Prefix
-                                    className="cursor-pointer touch-none"
-                                    onClick={() =>
-                                        setSwapHttps(
-                                            swapHttps === 'http'
-                                                ? 'https'
-                                                : 'http'
-                                        )
-                                    }
-                                >
-                                    {swapHttps}://
-                                </InputGroup.Prefix>
+                                <Tooltip delay={500}>
+                                    <Tooltip.Trigger>
+                                        <InputGroup.Prefix
+                                            className="cursor-pointer touch-none"
+                                            onClick={() => {
+                                                setSwapHttps(
+                                                    swapHttps === 'http'
+                                                        ? 'https'
+                                                        : 'http'
+                                                )
+                                                handleSetText(
+                                                    swapHttps === 'http'
+                                                        ? 'https://' +
+                                                              text.split(
+                                                                  '://'
+                                                              )[1]
+                                                        : 'http://' +
+                                                              text.split(
+                                                                  '://'
+                                                              )[1]
+                                                )
+                                            }}
+                                        >
+                                            {swapHttps}://
+                                        </InputGroup.Prefix>
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Content
+                                        className={
+                                            'border px-3 py-1.5 font-semibold'
+                                        }
+                                        showArrow={true}
+                                        offset={20}
+                                    >
+                                        <p>
+                                            Switch to{' '}
+                                            <span className="text-red-600">
+                                                {swapHttps === 'http'
+                                                    ? 'https://'
+                                                    : 'http://'}
+                                            </span>
+                                        </p>
+                                    </Tooltip.Content>
+                                </Tooltip>
+
                                 <InputGroup.Input
-                                    value={text.split('://')[2]}
+                                    value={
+                                        text.split('://')[1]
+                                            ? text.split('://')[2]
+                                            : ''
+                                    }
                                     onChange={(e) =>
-                                        setText(
+                                        handleSetText(
                                             (
                                                 `${swapHttps}://` +
                                                 e.currentTarget.value
                                             ).trim()
                                         )
                                     }
-                                    className="max-w-70"
+                                    // className="max-w-70"
                                 />
+
+                                {text.split('://')[1] && (
+                                    <InputGroup.Suffix className="pr-0">
+                                        <CloseButton
+                                            className="scale-75"
+                                            onClick={() =>
+                                                handleSetText('https://')
+                                            }
+                                        />
+                                    </InputGroup.Suffix>
+                                )}
                                 <InputGroup.Suffix className="pr-0">
                                     <Button
                                         isIconOnly
