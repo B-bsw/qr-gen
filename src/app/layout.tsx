@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Prompt } from 'next/font/google'
 import './globals.css'
+import { Providers } from './providers'
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -29,9 +30,9 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body className="h-screen w-screen overflow-y-hidden overscroll-y-none max-sm:h-[90vh]">
-                {children}
+                <Providers>{children}</Providers>
             </body>
         </html>
     )

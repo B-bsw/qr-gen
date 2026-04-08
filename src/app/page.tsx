@@ -23,8 +23,10 @@ import {
     Label,
     Tooltip,
     CloseButton,
+    Switch,
 } from '@heroui/react'
-import { Check, Copy } from 'lucide-react'
+import { Check, Copy, Moon, Sun } from 'lucide-react'
+import { useTheme } from './providers'
 
 const format = [
     {
@@ -78,6 +80,8 @@ export default function Page() {
     const [selectedFormat, setSelectedFormat] = useState<Key>('png')
     const [selectQuality, setSelectQuality] = useState<number>(512)
     const [swapHttps, setSwapHttps] = useState<'https' | 'http'>('https')
+
+    const { theme, setTheme } = useTheme()
 
     useEffect(() => {
         if (!text) {
@@ -199,328 +203,357 @@ export default function Page() {
     ]
 
     return (
-        <div className="flex h-full flex-col items-center justify-center overflow-auto transition-all">
-            <Toast.Provider placement="bottom end" />
-            <Card
-                variant="tertiary"
-                className="overflow-auto max-sm:rounded-none max-sm:bg-white max-sm:shadow-none"
-            >
-                <Card.Title className="text-2xl max-sm:text-center">
-                    <span className="text-black">QRCODE</span>
-                </Card.Title>
-                <div className="flex min-w-full justify-center">
-                    <section
-                        className={`h-86 w-86 rounded-lg p-1 max-sm:w-full`}
-                    >
-                        {text && (
-                            <div className="flex h-full flex-col items-center justify-center">
-                                {qrImage ? (
-                                    <img
-                                        src={qrImage}
-                                        alt="QR Code"
-                                        className="h-full w-full rounded-xl object-contain sm:drop-shadow-md"
-                                    />
+        <>
+            <header className="absolute top-0 z-1 flex w-full flex-row-reverse pt-4 pr-4">
+                <Switch
+                    size="lg"
+                    onChange={() =>
+                        setTheme(theme === 'dark' ? 'light' : 'dark')
+                    }
+                    isSelected={theme === 'dark'}
+                >
+                    <Switch.Control>
+                        <Switch.Thumb>
+                            <Switch.Icon>
+                                {theme === 'dark' ? (
+                                    <Moon size={16} />
                                 ) : (
-                                    <Spinner color="current" />
+                                    <Sun size={16} />
                                 )}
-                            </div>
-                        )}
-                    </section>
-                </div>
-                {/*<div>
-                    <h1 className="text-3xl">QR Code Generator</h1>
-                </div>*/}
-
-                {/*Color Picker*/}
-                <div className="flex w-full justify-center gap-5">
-                    {colorPicker.map((c) => (
-                        <ColorPicker
-                            key={c.id}
-                            value={c.value}
-                            onChange={c.set}
+                            </Switch.Icon>
+                        </Switch.Thumb>
+                    </Switch.Control>
+                </Switch>
+            </header>
+            <div className="flex h-full flex-col items-center justify-center overflow-auto transition-all">
+                <Toast.Provider placement="bottom end" />
+                <Card
+                    variant="tertiary"
+                    className="overflow-auto max-sm:rounded-none max-sm:bg-white max-sm:shadow-none dark:bg-zinc-800/90"
+                >
+                    <Card.Title className="text-2xl max-sm:text-center">
+                        <span className="text-black dark:text-white">
+                            QRCODE
+                        </span>
+                    </Card.Title>
+                    <div className="flex min-w-full justify-center">
+                        <section
+                            className={`h-86 w-86 rounded-lg p-1 max-sm:w-full`}
                         >
-                            <ColorPicker.Trigger>
-                                <ColorSwatch size="lg" />
-                                <Label className="text-black">
-                                    <span>{c.label}</span>
-                                </Label>
-                            </ColorPicker.Trigger>
-                            <ColorPicker.Popover className="gap-2">
-                                <ColorArea
-                                    aria-label="Color area"
-                                    className="max-w-full"
-                                    colorSpace="hsb"
-                                    xChannel="saturation"
-                                    yChannel="brightness"
-                                >
-                                    <ColorArea.Thumb />
-                                </ColorArea>
-                                <div className="flex flex-col items-center gap-2 px-1">
-                                    <ColorSlider
-                                        aria-label="Hue slider"
-                                        channel="hue"
-                                        className="flex-1"
-                                        colorSpace="hsb"
-                                    >
-                                        <ColorSlider.Track>
-                                            <ColorSlider.Thumb />
-                                        </ColorSlider.Track>
-                                    </ColorSlider>
-
-                                    <ColorSlider
-                                        aria-label="alpha slider"
-                                        channel="alpha"
-                                        className="flex-1"
-                                        colorSpace="rgb"
-                                    >
-                                        <ColorSlider.Track>
-                                            <ColorSlider.Thumb />
-                                        </ColorSlider.Track>
-                                    </ColorSlider>
+                            {text && (
+                                <div className="flex h-full flex-col items-center justify-center">
+                                    {qrImage ? (
+                                        <img
+                                            src={qrImage}
+                                            alt="QR Code"
+                                            className="h-full w-full rounded-xl object-contain sm:drop-shadow-md"
+                                        />
+                                    ) : (
+                                        <Spinner color="current" />
+                                    )}
                                 </div>
-                                <ColorField aria-label="Color field">
-                                    <ColorField.Group variant="secondary">
-                                        <ColorField.Prefix>
-                                            <ColorSwatch size="xs" />
-                                        </ColorField.Prefix>
-                                        <ColorField.Input />
-                                    </ColorField.Group>
-                                </ColorField>
-                            </ColorPicker.Popover>
-                        </ColorPicker>
-                    ))}
-                </div>
-                {/*INPUT URL*/}
-                <section className="flex w-full flex-col items-center justify-center gap-2">
-                    <div className="w-full">
-                        <TextField
-                            className="w-full"
-                            defaultValue={placeholderURL.split('://')[1]}
-                            name="website"
-                            // variant="secondary"
-                            aria-label="input url"
-                        >
-                            <InputGroup onClick={() => setIsCheckCopy(false)}>
-                                <Tooltip delay={500}>
-                                    <Tooltip.Trigger>
-                                        <InputGroup.Prefix
-                                            className="cursor-pointer touch-none"
-                                            onClick={() => {
-                                                setSwapHttps(
-                                                    swapHttps === 'http'
-                                                        ? 'https'
-                                                        : 'http'
+                            )}
+                        </section>
+                    </div>
+
+                    <div className="flex w-full justify-center gap-5">
+                        {colorPicker.map((c) => (
+                            <ColorPicker
+                                key={c.id}
+                                value={c.value}
+                                onChange={c.set}
+                            >
+                                <ColorPicker.Trigger>
+                                    <ColorSwatch size="lg" />
+                                    <Label className="text-black dark:text-white">
+                                        <span>{c.label}</span>
+                                    </Label>
+                                </ColorPicker.Trigger>
+                                <ColorPicker.Popover className="gap-2">
+                                    <ColorArea
+                                        aria-label="Color area"
+                                        className="max-w-full"
+                                        colorSpace="hsb"
+                                        xChannel="saturation"
+                                        yChannel="brightness"
+                                    >
+                                        <ColorArea.Thumb />
+                                    </ColorArea>
+                                    <div className="flex flex-col items-center gap-2 px-1">
+                                        <ColorSlider
+                                            aria-label="Hue slider"
+                                            channel="hue"
+                                            className="flex-1"
+                                            colorSpace="hsb"
+                                        >
+                                            <ColorSlider.Track>
+                                                <ColorSlider.Thumb />
+                                            </ColorSlider.Track>
+                                        </ColorSlider>
+
+                                        <ColorSlider
+                                            aria-label="alpha slider"
+                                            channel="alpha"
+                                            className="flex-1"
+                                            colorSpace="rgb"
+                                        >
+                                            <ColorSlider.Track>
+                                                <ColorSlider.Thumb />
+                                            </ColorSlider.Track>
+                                        </ColorSlider>
+                                    </div>
+                                    <ColorField aria-label="Color field">
+                                        <ColorField.Group variant="secondary">
+                                            <ColorField.Prefix>
+                                                <ColorSwatch size="xs" />
+                                            </ColorField.Prefix>
+                                            <ColorField.Input />
+                                        </ColorField.Group>
+                                    </ColorField>
+                                </ColorPicker.Popover>
+                            </ColorPicker>
+                        ))}
+                    </div>
+                    {/*INPUT URL*/}
+                    <section className="flex w-full flex-col items-center justify-center gap-2">
+                        <div className="w-full">
+                            <TextField
+                                className="w-full"
+                                defaultValue={placeholderURL.split('://')[1]}
+                                name="website"
+                                // variant="secondary"
+                                aria-label="input url"
+                            >
+                                <InputGroup
+                                    onClick={() => setIsCheckCopy(false)}
+                                >
+                                    <Tooltip delay={500}>
+                                        <Tooltip.Trigger>
+                                            <InputGroup.Prefix
+                                                className="cursor-pointer touch-none"
+                                                onClick={() => {
+                                                    setSwapHttps(
+                                                        swapHttps === 'http'
+                                                            ? 'https'
+                                                            : 'http'
+                                                    )
+                                                    handleSetText(
+                                                        swapHttps === 'http'
+                                                            ? 'https://' +
+                                                                  text.split(
+                                                                      '://'
+                                                                  )[1]
+                                                            : 'http://' +
+                                                                  text.split(
+                                                                      '://'
+                                                                  )[1]
+                                                    )
+                                                }}
+                                            >
+                                                {swapHttps}://
+                                            </InputGroup.Prefix>
+                                        </Tooltip.Trigger>
+                                        <Tooltip.Content
+                                            className={
+                                                'border px-3 py-1.5 font-semibold'
+                                            }
+                                            showArrow={true}
+                                            offset={20}
+                                        >
+                                            <p>
+                                                Switch to{' '}
+                                                <span className="text-red-600">
+                                                    {swapHttps === 'http'
+                                                        ? 'https://'
+                                                        : 'http://'}
+                                                </span>
+                                            </p>
+                                        </Tooltip.Content>
+                                    </Tooltip>
+
+                                    <InputGroup.Input
+                                        value={
+                                            text.split('://')[1]
+                                                ? text.split('://')[2]
+                                                : ''
+                                        }
+                                        onChange={(e) =>
+                                            handleSetText(
+                                                (
+                                                    `${swapHttps}://` +
+                                                    e.currentTarget.value
+                                                ).trim()
+                                            )
+                                        }
+                                        // className="max-w-70"
+                                    />
+
+                                    {text.split('://')[1] && (
+                                        <InputGroup.Suffix className="pr-0">
+                                            <CloseButton
+                                                className="scale-75"
+                                                onClick={() =>
+                                                    handleSetText('https://')
+                                                }
+                                            />
+                                        </InputGroup.Suffix>
+                                    )}
+                                    <InputGroup.Suffix className="pr-0">
+                                        <Button
+                                            isIconOnly
+                                            aria-label="Copy"
+                                            size="sm"
+                                            variant="ghost"
+                                            isDisabled={isCheckCopy}
+                                            onPress={() => {
+                                                navigator.clipboard.writeText(
+                                                    text
                                                 )
-                                                handleSetText(
-                                                    swapHttps === 'http'
-                                                        ? 'https://' +
-                                                              text.split(
-                                                                  '://'
-                                                              )[1]
-                                                        : 'http://' +
-                                                              text.split(
-                                                                  '://'
-                                                              )[1]
-                                                )
+                                                setIsCheckCopy(true)
                                             }}
                                         >
-                                            {swapHttps}://
-                                        </InputGroup.Prefix>
-                                    </Tooltip.Trigger>
-                                    <Tooltip.Content
-                                        className={
-                                            'border px-3 py-1.5 font-semibold'
-                                        }
-                                        showArrow={true}
-                                        offset={20}
-                                    >
-                                        <p>
-                                            Switch to{' '}
-                                            <span className="text-red-600">
-                                                {swapHttps === 'http'
-                                                    ? 'https://'
-                                                    : 'http://'}
-                                            </span>
-                                        </p>
-                                    </Tooltip.Content>
-                                </Tooltip>
-
-                                <InputGroup.Input
-                                    value={
-                                        text.split('://')[1]
-                                            ? text.split('://')[2]
-                                            : ''
-                                    }
-                                    onChange={(e) =>
-                                        handleSetText(
-                                            (
-                                                `${swapHttps}://` +
-                                                e.currentTarget.value
-                                            ).trim()
-                                        )
-                                    }
-                                    // className="max-w-70"
-                                />
-
-                                {text.split('://')[1] && (
-                                    <InputGroup.Suffix className="pr-0">
-                                        <CloseButton
-                                            className="scale-75"
-                                            onClick={() =>
-                                                handleSetText('https://')
-                                            }
-                                        />
+                                            {isCheckCopy ? <Check /> : <Copy />}
+                                        </Button>
                                     </InputGroup.Suffix>
-                                )}
-                                <InputGroup.Suffix className="pr-0">
-                                    <Button
-                                        isIconOnly
-                                        aria-label="Copy"
-                                        size="sm"
-                                        variant="ghost"
-                                        isDisabled={isCheckCopy}
-                                        onPress={() => {
-                                            navigator.clipboard.writeText(text)
-                                            setIsCheckCopy(true)
-                                        }}
-                                    >
-                                        {isCheckCopy ? <Check /> : <Copy />}
-                                    </Button>
-                                </InputGroup.Suffix>
-                            </InputGroup>
-                        </TextField>
-                    </div>
-                    {/*Selection*/}
-                    <div className="flex w-full flex-col items-center gap-3">
-                        <div className="flex w-full items-center gap-2">
-                            {/*Format type*/}
-                            <Select
-                                className="w-full"
-                                placeholder="Select one"
-                                // variant="secondary"
-                                defaultValue={'png'}
-                                aria-label="format"
-                                onChange={(e) => setSelectedFormat(e as Key)}
-                            >
-                                <Label className="w-full text-center text-xs text-black">
-                                    Format type
-                                </Label>
-                                <Select.Trigger>
-                                    <Select.Value />
-                                    <Select.Indicator />
-                                </Select.Trigger>
-                                <Select.Popover>
-                                    {format && (
+                                </InputGroup>
+                            </TextField>
+                        </div>
+                        {/*Selection*/}
+                        <div className="flex w-full flex-col items-center gap-3">
+                            <div className="flex w-full items-center gap-2">
+                                {/*Format type*/}
+                                <Select
+                                    className="w-full"
+                                    placeholder="Select one"
+                                    // variant="secondary"
+                                    defaultValue={'png'}
+                                    aria-label="format"
+                                    onChange={(e) =>
+                                        setSelectedFormat(e as Key)
+                                    }
+                                >
+                                    <Label className="w-full text-center text-xs text-black dark:text-white">
+                                        Format type
+                                    </Label>
+                                    <Select.Trigger>
+                                        <Select.Value />
+                                        <Select.Indicator />
+                                    </Select.Trigger>
+                                    <Select.Popover>
+                                        {format && (
+                                            <ListBox>
+                                                {format.map((f) => (
+                                                    <ListBox.Item
+                                                        key={f.key}
+                                                        id={f.value}
+                                                        textValue={f.value}
+                                                    >
+                                                        {f.name}
+                                                        <ListBox.ItemIndicator />
+                                                    </ListBox.Item>
+                                                ))}
+                                            </ListBox>
+                                        )}
+                                    </Select.Popover>
+                                </Select>
+
+                                {/*Level*/}
+                                <Select
+                                    className="w-full"
+                                    placeholder="Select one"
+                                    // variant="secondary"
+                                    defaultValue={level}
+                                    aria-label="level"
+                                    onChange={(e) =>
+                                        setLevel(e as ErrorCorrectionLevel)
+                                    }
+                                >
+                                    <Label className="w-full text-center text-xs text-black dark:text-white">
+                                        Error Correction
+                                    </Label>
+                                    <Select.Trigger>
+                                        <Select.Value />
+                                        <Select.Indicator />
+                                    </Select.Trigger>
+                                    <Select.Popover>
                                         <ListBox>
-                                            {format.map((f) => (
+                                            {errCorrLvl.map((lvl) => (
                                                 <ListBox.Item
-                                                    key={f.key}
-                                                    id={f.value}
-                                                    textValue={f.value}
+                                                    key={lvl.id}
+                                                    id={lvl.level}
+                                                    textValue={lvl.level}
                                                 >
-                                                    {f.name}
+                                                    <span className="uppercase">
+                                                        {lvl.level}
+                                                    </span>
                                                     <ListBox.ItemIndicator />
                                                 </ListBox.Item>
                                             ))}
                                         </ListBox>
-                                    )}
-                                </Select.Popover>
-                            </Select>
+                                    </Select.Popover>
+                                </Select>
 
-                            {/*Level*/}
-                            <Select
-                                className="w-full"
-                                placeholder="Select one"
-                                // variant="secondary"
-                                defaultValue={level}
-                                aria-label="level"
-                                onChange={(e) =>
-                                    setLevel(e as ErrorCorrectionLevel)
-                                }
-                            >
-                                <Label className="w-full text-center text-xs text-black">
-                                    Error Correction
-                                </Label>
-                                <Select.Trigger>
-                                    <Select.Value />
-                                    <Select.Indicator />
-                                </Select.Trigger>
-                                <Select.Popover>
-                                    <ListBox>
-                                        {errCorrLvl.map((lvl) => (
-                                            <ListBox.Item
-                                                key={lvl.id}
-                                                id={lvl.level}
-                                                textValue={lvl.level}
-                                            >
-                                                <span className="uppercase">
-                                                    {lvl.level}
-                                                </span>
-                                                <ListBox.ItemIndicator />
-                                            </ListBox.Item>
-                                        ))}
-                                    </ListBox>
-                                </Select.Popover>
-                            </Select>
-
-                            {/*Quality*/}
-                            <Select
-                                className="w-full"
-                                placeholder="Select one"
-                                // variant="secondary"
-                                defaultValue={512}
-                                aria-label="quality"
-                                onChange={(e) => setSelectQuality(e as number)}
-                            >
-                                <Label className="w-full text-center text-xs text-black">
-                                    Quality
-                                </Label>
-                                <Select.Trigger>
-                                    <Select.Value />
-                                    <Select.Indicator />
-                                </Select.Trigger>
-                                <Select.Popover>
-                                    <ListBox>
-                                        {qualityLevel.map((q) => (
-                                            <ListBox.Item
-                                                key={q.id}
-                                                id={q.q}
-                                                textValue={q.q.toString()}
-                                            >
-                                                <span className="uppercase">
-                                                    {q.q}
-                                                </span>
-                                                <ListBox.ItemIndicator />
-                                            </ListBox.Item>
-                                        ))}
-                                    </ListBox>
-                                </Select.Popover>
-                            </Select>
-                        </div>
-                        <div className="ustify-center flex w-full gap-2">
-                            <ButtonGroup
-                                fullWidth
-                                className="**:first:rounded-l-xl **:last:rounded-r-xl"
-                            >
-                                <Button
-                                    onPress={handleDownload}
-                                    isDisabled={!qrImage || !qrSvg}
+                                {/*Quality*/}
+                                <Select
+                                    className="w-full"
+                                    placeholder="Select one"
+                                    // variant="secondary"
+                                    defaultValue={512}
+                                    aria-label="quality"
+                                    onChange={(e) =>
+                                        setSelectQuality(e as number)
+                                    }
                                 >
-                                    <ButtonGroup.Separator />
-                                    Download
-                                </Button>
-                                <Button
-                                    onClick={copyLink}
-                                    isDisabled={isDisable}
+                                    <Label className="w-full text-center text-xs text-black dark:text-white">
+                                        Quality
+                                    </Label>
+                                    <Select.Trigger>
+                                        <Select.Value />
+                                        <Select.Indicator />
+                                    </Select.Trigger>
+                                    <Select.Popover>
+                                        <ListBox>
+                                            {qualityLevel.map((q) => (
+                                                <ListBox.Item
+                                                    key={q.id}
+                                                    id={q.q}
+                                                    textValue={q.q.toString()}
+                                                >
+                                                    <span className="uppercase">
+                                                        {q.q}
+                                                    </span>
+                                                    <ListBox.ItemIndicator />
+                                                </ListBox.Item>
+                                            ))}
+                                        </ListBox>
+                                    </Select.Popover>
+                                </Select>
+                            </div>
+                            <div className="ustify-center flex w-full gap-2">
+                                <ButtonGroup
+                                    variant="tertiary"
+                                    fullWidth
+                                    className="**:bg-white **:first:rounded-l-xl **:last:rounded-r-xl **:dark:bg-[#19191c]"
                                 >
-                                    <ButtonGroup.Separator />
-                                    Copy QR Code ( Image )
-                                </Button>
-                            </ButtonGroup>
+                                    <Button
+                                        onPress={handleDownload}
+                                        isDisabled={!qrImage || !qrSvg}
+                                    >
+                                        Download
+                                    </Button>
+                                    <Button
+                                        onClick={copyLink}
+                                        isDisabled={isDisable}
+                                    >
+                                        <ButtonGroup.Separator />
+                                        Copy QR Code Image Link
+                                    </Button>
+                                </ButtonGroup>
+                            </div>
                         </div>
-                    </div>
-                </section>
-            </Card>
-        </div>
+                    </section>
+                </Card>
+            </div>
+        </>
     )
 }
