@@ -46,20 +46,20 @@ const format = [
     },
 ]
 
-type ErrorCorrectionLevel = 'high' | 'low' | 'medium' | 'quartile'
+type ErrorCorrectionLevel = 'low' | 'high' | 'medium' | 'quartile'
 
 const errCorrLvl = [
-    { id: 1, level: 'high' },
-    { id: 2, level: 'low' },
-    { id: 3, level: 'medium' },
+    { id: 1, level: 'low' },
+    { id: 2, level: 'medium' },
+    { id: 3, level: 'high' },
     { id: 4, level: 'quartile' },
 ]
 
 const qualityLevel = [
-    { id: 4, q: 128 },
-    { id: 5, q: 512 },
-    { id: 6, q: 1024 },
-    { id: 7, q: 2048 },
+    { id: 1, q: 128 },
+    { id: 2, q: 512 },
+    { id: 3, q: 1024 },
+    { id: 4, q: 2048 },
 ]
 
 const placeholderURL = 'https://qr.b-bsw.com'
@@ -212,8 +212,8 @@ export default function Page() {
                     }
                     isSelected={theme === 'dark'}
                 >
-                    <Switch.Control>
-                        <Switch.Thumb>
+                    <Switch.Control className="h-7.75 w-12.75">
+                        <Switch.Thumb className="size-6.75">
                             <Switch.Icon>
                                 {theme === 'dark' ? (
                                     <Moon size={16} />
@@ -225,11 +225,12 @@ export default function Page() {
                     </Switch.Control>
                 </Switch>
             </header>
+
             <div className="flex h-full flex-col items-center justify-center overflow-auto transition-all">
                 <Toast.Provider placement="bottom end" />
                 <Card
                     variant="tertiary"
-                    className="overflow-auto max-sm:rounded-none max-sm:bg-white max-sm:shadow-none dark:bg-zinc-800/90"
+                    className="overflow-auto max-sm:rounded-none max-sm:bg-white max-sm:shadow-none max-sm:dark:bg-[#121212]"
                 >
                     <Card.Title className="text-2xl max-sm:text-center">
                         <span className="text-black dark:text-white">
@@ -244,9 +245,10 @@ export default function Page() {
                                 <div className="flex h-full flex-col items-center justify-center">
                                     {qrImage ? (
                                         <img
+                                            loading="lazy"
                                             src={qrImage}
                                             alt="QR Code"
-                                            className="h-full w-full rounded-xl object-contain sm:drop-shadow-md"
+                                            className="h-full w-full object-contain sm:rounded-xl sm:drop-shadow-sm"
                                         />
                                     ) : (
                                         <Spinner color="current" />
@@ -314,6 +316,7 @@ export default function Page() {
                             </ColorPicker>
                         ))}
                     </div>
+
                     {/*INPUT URL*/}
                     <section className="flex w-full flex-col items-center justify-center gap-2">
                         <div className="w-full">
@@ -533,7 +536,7 @@ export default function Page() {
                                 <ButtonGroup
                                     variant="tertiary"
                                     fullWidth
-                                    className="**:bg-white **:first:rounded-l-xl **:last:rounded-r-xl **:dark:bg-[#19191c]"
+                                    className="rounded-xl shadow-sm **:bg-white **:first:rounded-l-xl **:last:rounded-r-xl **:hover:bg-zinc-50 **:dark:bg-[#19191c]"
                                 >
                                     <Button
                                         onPress={handleDownload}

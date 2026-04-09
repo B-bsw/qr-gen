@@ -15,7 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const [theme, setThemeState] = useState<Theme>('light')
 
     useEffect(() => {
-        const storedTheme = localStorage.getItem('theme')
+        const storedTheme = localStorage.getItem('qr-theme')
         if (storedTheme === 'light' || storedTheme === 'dark') {
             setThemeState(storedTheme)
             document.documentElement.classList.toggle(
@@ -30,7 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     const setTheme = (nextTheme: Theme) => {
         setThemeState(nextTheme)
-        localStorage.setItem('theme', nextTheme)
+        localStorage.setItem('qr-theme', nextTheme)
         document.documentElement.classList.toggle('dark', nextTheme === 'dark')
     }
 
